@@ -73,6 +73,9 @@ class project(Agg_Operation):
 class group(Agg_Operation):
     pass
 
+class count(Agg_Operation):
+    pass
+
 class lookup(Agg_Operation):
     pass
 

@@ -8,7 +8,6 @@ class Pipeline(list):
         self._agg_op = Agg_Operation()
         self._app_op_list = Agg_Operation.ops()
 
-        self._pipeline = []
         for i in args:
             if i.name() in Agg_Operation.ops():
                 if i.name() in self._app_op_list:
@@ -31,4 +30,5 @@ class Pipeline(list):
         return pprint.pformat( self)
 
     def aggregate(self, collection):
-        return collection.aggregate(str(self))
+        print(self.pp())
+        return collection.aggregate(self)
