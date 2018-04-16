@@ -35,6 +35,8 @@ class Test( unittest.TestCase):
         x = Pipeline( m, l, g )
         self.assertEqual( x, [ m, l, g])
         self.assertEqual( repr(x), "[" + repr(m) + ", " + repr(l) + ", " + repr(g)+ "]")
+
+        print( x.pp())
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

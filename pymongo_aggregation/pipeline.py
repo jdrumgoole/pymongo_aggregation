@@ -1,5 +1,5 @@
 from pymongo_aggregation.agg_operation import Agg_Operation
-
+import pprint
 
 class Pipeline(list):
 
@@ -24,9 +24,11 @@ class Pipeline(list):
             else:
                 raise ValueError( "{} is not a subclass of {}".format( k,self._agg_op.__name__ ))
 
-    def __str__(self):
-        return "[" + ", ".join( [ str(i) for i in self]) + "]"
-
     def __repr__(self):
         return "[" + ", ".join([repr(i) for i in self]) + "]"
 
+    def pp(self):
+        return pprint.pformat( self)
+
+    def aggregate(self, collection):
+        return collection.aggregate(str(self))
