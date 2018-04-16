@@ -7,16 +7,16 @@ Created on 30 Sep 2016
 from setuptools import setup
 import os
 from codecs import open
-
+from pymongo_aggregation.version import __VERSION__
 def read(f):
     return open(f, 'r').read()
     
 setup(
     name = "pymongo_aggregation",
-    version = "0.1a1",
+    version = "0.1a5", #__VERSION__,
     author = "Joe Drumgoole",
     author_email = "joe@joedrumgoole.com",
-    description = "A set of covenience classes for using the Pymongo MongoDB aggregation framework",
+    description = "A set of convenience classes for using the Pymongo MongoDB aggregation framework",
     long_description = read('README.md'),
     package_data={'': ['LICENSE']},
     include_package_data=True,
@@ -34,7 +34,7 @@ setup(
         'Intended Audience :: Developers',
 
         # Pick your license as you wish (should match "license" above)
-        'License :: OSI Approved :: Apache License V2.0',
+        'License :: OSI Approved :: Apache Software License',
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.

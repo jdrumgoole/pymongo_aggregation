@@ -1,7 +1,7 @@
 """
 Basic unit tests for agg_operation
 """
-from pymongo_aggregation.agg_operation import Agg_Operation, match, Example_for_Sample_Op_with_name, lookup
+from pymongo_aggregation.agg_operation import Agg_Operation, match, Example_for_Sample_Op_with_name, lookup, count_x
 import unittest
 import datetime
 
@@ -30,7 +30,7 @@ class Test( unittest.TestCase):
 
     def test_repr(self):
         op = lookup()
-        self.assertEqual( repr(op), "lookup({})")
+        self.assertEqual( repr(op), "{\'$lookup\': {}}")
 
     def test_str(self):
         op = lookup()
@@ -50,6 +50,11 @@ class Test( unittest.TestCase):
 
         self.assertEqual( op(), {'$match': {'created': {'$gte': now }}})
 
+    def test_count_x(self):
+
+        op=count_x("counter")
+        #print(op)
+        self.assertRaises( ValueError, count_x, None)
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

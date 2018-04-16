@@ -26,9 +26,11 @@ class Pipeline(list):
     def __repr__(self):
         return "[" + ", ".join([repr(i) for i in self]) + "]"
 
+    def __call__(self):
+        return [ i() for i in self ]
+
     def pp(self):
         return pprint.pformat( self)
 
     def aggregate(self, collection):
-        print(self.pp())
-        return collection.aggregate(self)
+        return collection.aggregate(self())

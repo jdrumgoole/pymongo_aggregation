@@ -14,7 +14,7 @@ easier.
 import pprint
 from datetime import datetime
 from collections import OrderedDict
-from mongodb_utils.nested_dict import Nested_Dict
+from pymongo_aggregation.nested_dict import Nested_Dict
 
 import pymongo
 import csv
@@ -83,25 +83,23 @@ class CursorFormatter(object):
     If root is a file name output the content to that file.
     '''
 
-    def __init__(self, agg, filename="", formatter="json", results=None):
+    def __init__(self, cursor, filename="", formatter="json", results=None):
         '''
         Data from cursor
         output to <filename>suffix.ext.
         '''
 
-        if (isinstance(agg, pymongo.cursor.Cursor) or
-                isinstance(agg, pymongo.command_cursor.CommandCursor) or
-                isinstance(agg, Agg)):
-            self._agg = agg
-        else:
-            raise ValueError("aggregate argument to CursorFormatter is not of class Agg or cursor")
+        self._results = []
+        self._cursor = cursor
 
-        self._format = formatter
-        self._filename = filename
-        if results is None:
-            self._results = []
+        if (isinstance(cursor, pymongo.cursor.Cursor) or
+                isinstance(cursor, pymongo.command_cursor.CommandCursor)):
+            self._format = formatter
+            self._filename = filename
+            if results:
+                self._results = results
         else:
-            self._results = results
+            raise ValueError("aggregate argument to CursorFormatter is not of class pymongo cursor")
 
     def results(self):
         return self._results
@@ -189,15 +187,17 @@ class CursorFormatter(object):
                 d = CursorFormatter.fieldMapper(i, fieldnames)
                 d = CursorFormatter.dateMapper(d, datemap, time_format)
 
-                x = {}
-                for k, v in d.items():
+                # x = {}
+                # for k, v in d.items():
+                #
+                #     if type(v) is unicode:
+                #         x[k] = v
+                #     else:
+                #         x[k] = str(v).encode('utf8')
 
-                    if type(v) is unicode:
-                        x[k] = v
-                    else:
-                        x[k] = str(v).encode('utf8')
+                #writer.writerow({k: v.encode('utf8') for k, v in x.items()})
 
-                writer.writerow({k: v.encode('utf8') for k, v in x.items()})
+                writer.writerow(d)
 
         return count
 
@@ -241,32 +241,17 @@ class CursorFormatter(object):
 
         return count
 
-    def output(self, fieldNames=None, datemap=None, time_format=None, aggregate=True, limit=None):
+    def output(self, fieldNames=None, datemap=None, time_format=None, aggregate=True):
         '''
         Output all fields using the fieldNames list. for fields in the list datemap indicates the field must
         be date
         '''
 
-        cursor = None
-        #         if self._filename != "-" :
-        #             print( "Writing to '%s'" % self._filename )
 
-        if isinstance(self._agg, Agg):
-            if limit:
-                self._agg.addLimit(limit)
-            if aggregate:
-                # print( self._agg )
-                cursor = self._agg.aggregate()
-        else:
-            cursor = self._agg
-
-        count = self.printCursor(cursor, fieldNames, datemap, time_format)
+        count = self.printCursor(self._cursor, fieldNames, datemap, time_format)
 
 
 #         print( "Wrote %i records" % count )
-
-
-
 
 
 class Agg(object):
@@ -287,7 +272,7 @@ class Agg(object):
         self._agg = []
 
     def __getattr__(self, op_name, op):
-        return {op_name : op}
+        return {op_name: op}
 
     @staticmethod
     def __limit(size):

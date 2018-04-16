@@ -73,8 +73,22 @@ class project(Agg_Operation):
 class group(Agg_Operation):
     pass
 
-class count(Agg_Operation):
-    pass
+class count_x(Agg_Operation):
+    """
+    Disambiguate from count function
+    """
+
+    def __init__(self, count_field):
+        if isinstance( count_field, str):
+            if count_field:
+                self._doc = count_field
+            else:
+                raise ValueError( "count_field cannot be None")
+        else:
+            raise ValueError( "count_field must be a string (str type)")
+
+    def op_name(self):
+        return "$count"
 
 class lookup(Agg_Operation):
     pass
