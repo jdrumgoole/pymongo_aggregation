@@ -6,7 +6,7 @@
 
 PYBIN=.venv/bin
 
-pip:test build
+pip:clean test build
 	sh prod-twine.sh
 
 test_build:

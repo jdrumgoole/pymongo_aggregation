@@ -4,24 +4,24 @@ Created on 30 Sep 2016
 
 @author: jdrumgoole
 '''
-from setuptools import setup
+from setuptools import setup, find_packages
 import os
 from codecs import open
-from pymongo_aggregation.version import __VERSION__
+VERSION="0.2a1"
+
 def read(f):
     return open(f, 'r').read()
     
 setup(
     name = "pymongo_aggregation",
-    version = "0.1a5", #__VERSION__,
+    version = VERSION,
     author = "Joe Drumgoole",
     author_email = "joe@joedrumgoole.com",
     description = "A set of convenience classes for using the Pymongo MongoDB aggregation framework",
     long_description = read('README.md'),
-    package_data={'': ['LICENSE']},
     include_package_data=True,
     keywords = "MongoDB API Aggregation",
-    url = "https://github.com/jdrumgoole/mongodb_utils",
+    url = "https://github.com/jdrumgoole/pymongodb_aggregation",
     
     classifiers=[
         # How mature is this project? Common values are
@@ -41,8 +41,11 @@ setup(
         'Programming Language :: Python :: 3.6' ],
    
     install_requires = [ "pymongo", "nose" ],
-       
-    packages = [ "pymongo_aggregation", "test"],
+    package_data={
+        '': ['*.txt', '*.rst', '*.md'],
+    },
+
+    packages = find_packages(),
     test_suite='nose.collector',
     tests_require=['nose'],
 )

@@ -10,6 +10,7 @@ the correct name for the MongoDB Aggregation operation
 
 from collections import OrderedDict
 import datetime
+import pymongo
 
 class Agg_Operation(object):
 
@@ -161,5 +162,51 @@ class Example_for_Sample_Op_with_name(Agg_Operation):
     def name(self):
         return "sample"
 
+class Sorter(object):
+    '''
+    Required for ordered sorting of fields as python dictionaries do not
+    guarantee to maintain insertion order. Sorted fields are maintained
+    in an ``OrderedDict`` class that ensures order is maintained.
+    '''
+
+    def __init__(self, **kwargs):
+        '''
+        parameters are key="asending" or key="descending"
+        '''
+        self._sorted = {}
+        self._sorted["$sort"] = OrderedDict()
+
+        self.add(kwargs)
+
+    def add(self, sorts):
+        for k, v in sorts.items():
+            self.add_sort(k, v)
+
+    def sort_fields(self):
+        return self._sorted["$sort"].keys()
+
+    def sort_items(self):
+        return self._sorted["$sort"].items()
+
+    def sort_directions(self):
+        return self._sorted["$sort"].values()
+
+    def sorts(self):
+        return self._sorted
+
+    def add_sort(self, field, sortOrder=pymongo.ASCENDING):
+        if sortOrder in [pymongo.ASCENDING, pymongo.DESCENDING]:
+            self._sorted["$sort"][field] = sortOrder
+        else:
+            raise ValueError("Invalid sort order must be pymongo.ASCENDING or pymongo.DESCENDING")
+
+    def __call__(self):
+        return self._sorted
+
+    def __str__(self):
+        return str(self._sorted)
+
+    def __repr__(self):
+        return self.__str__()
 
 
