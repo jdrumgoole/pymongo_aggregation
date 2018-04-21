@@ -17,5 +17,18 @@ test:
 
 build:
 	${PYBIN}/python setup.py sdist
+
 clean:
 	rm -rf dist bdist sdist
+
+test_data:
+	(cd data;sh restore.sh)
+
+init:
+	pip install --upgrade pip
+	pip install twine
+	pip install keyring
+	pip install dateutils
+	keyring set https://test.pypi.org/legacy/ jdrumgoole
+	keyring set https://upload.pypi.org/legacy/ jdrumgoole
+

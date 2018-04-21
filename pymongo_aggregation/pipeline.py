@@ -30,7 +30,7 @@ class Pipeline(list):
         return [ i() for i in self ]
 
     def pp(self):
-        return pprint.pformat( self)
+        return pprint.pprint( self)
 
     def aggregate(self, collection):
         return collection.aggregate(self())

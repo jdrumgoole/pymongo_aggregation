@@ -58,7 +58,7 @@ class Sorter(object):
 
     def add_sort(self, field, sortOrder=pymongo.ASCENDING):
         if sortOrder in [pymongo.ASCENDING, pymongo.DESCENDING]:
-            self._sorted["$sort"][field] = sortOrder
+            self._doc[field] = sortOrder
         else:
             raise ValueError("Invalid sort order must be pymongo.ASCENDING or pymongo.DESCENDING")
 

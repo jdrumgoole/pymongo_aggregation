@@ -41,6 +41,7 @@ setup(
         'Programming Language :: Python :: 3.6' ],
    
     install_requires = [ "pymongo", "nose" ],
+    tests_require = [ "dateutil"],
     package_data={
         '': ['*.txt', '*.rst', '*.md'],
     },

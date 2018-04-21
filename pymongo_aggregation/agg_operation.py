@@ -13,6 +13,9 @@ import datetime
 import pymongo
 
 class Agg_Operation(object):
+    """
+    Superclass for all MongoDB Aggregation operations
+    """
 
     subclasses = OrderedDict()
 
@@ -68,6 +71,34 @@ class match(Agg_Operation):
 
         return range_query
 
+class range_match(match):
+    """
+    Create a match operator specifying that a field fall between two date
+    ranges *start* and *end*.
+    """
+
+    def __init__(self, field, start=None, end=None):
+        if start is not None and not isinstance(start, datetime.datetime):
+            raise ValueError( "{} is not and instance of datetime".format( start ))
+        if end is not None and not isinstance(end, datetime.datetime):
+            raise ValueError( "{} is not and instance of datetime".format( end ))
+
+        self._doc = {field:{}}
+        if start and end:
+            self._doc = {field: {"$gte": start, "$lte": end}}
+        elif start:
+            self._doc = {field: {"$gte": start}}
+        elif end:
+            self._doc = {field: {"$lte": end}}
+
+    def name(self):
+        """
+        Override the use of the class name as the name of the class so we parse the right
+        operator
+        :return: "match"
+        """
+        return "match"
+
 class project(Agg_Operation):
     pass
 
@@ -95,7 +126,43 @@ class lookup(Agg_Operation):
     pass
 
 class sort(Agg_Operation):
-    pass
+    '''
+    Required for ordered sorting of fields as python dictionaries do not
+    guarantee to maintain insertion order. Sorted fields are maintained
+    in an ``OrderedDict`` class that ensures order is maintained.
+    '''
+
+    def __init__(self, *args):
+        '''
+        parameters are key="asending" or key="descending"
+        Can use kwargs in the form field=pymongo.ASCENDING because field may
+        be a dotted string e.g. "group.name".
+        '''
+        self._doc = OrderedDict()
+
+        self.add(args)
+
+    def add(self, sorts):
+        for i in sorts:
+            if isinstance( i, tuple):
+                self.add_sort(i[0], i[1])
+            else:
+                self.add_sort( i, pymongo.ASCENDING)
+
+    def sort_fields(self):
+        return self._doc.keys()
+
+    def sort_items(self):
+        return self._doc.items()
+
+    def sort_directions(self):
+        return self._doc.values()
+
+    def add_sort(self, field, sortOrder=pymongo.ASCENDING):
+        if sortOrder in [pymongo.ASCENDING, pymongo.DESCENDING]:
+            self._doc[field] = sortOrder
+        else:
+            raise ValueError("Invalid sort order must be pymongo.ASCENDING or pymongo.DESCENDING")
 
 class sortByCount(Agg_Operation):
     pass

@@ -1,7 +1,8 @@
 """
 Basic unit tests for agg_operation
 """
-from pymongo_aggregation.agg_operation import Agg_Operation, match, Example_for_Sample_Op_with_name, lookup, count_x
+from pymongo_aggregation.agg_operation import Agg_Operation, \
+    match, Example_for_Sample_Op_with_name, lookup, count_x, sort
 import unittest
 import datetime
 
@@ -55,6 +56,12 @@ class Test( unittest.TestCase):
         op=count_x("counter")
         #print(op)
         self.assertRaises( ValueError, count_x, None)
+
+    def test_sort(self):
+
+        op = sort( name=1, date=-1 )
+        print(op)
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
