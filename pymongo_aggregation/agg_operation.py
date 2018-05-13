@@ -8,30 +8,42 @@ the class name just make sure to override the name operator with
 the correct name for the MongoDB Aggregation operation
 """
 
-from collections import OrderedDict
 import datetime
+from collections import OrderedDict
+
 import pymongo
 
+
 class Agg_Operation(object):
+
+    subclasses = OrderedDict()
+
+    @staticmethod
+    def ops():
+        return Agg_Operation.subclasses
+
+    def name(self):
+        return self.__class__.__name__
+
+    def op_name(self):
+        return "$" + self.name()
+
+class Doc_Operation(Agg_Operation):
     """
     Superclass for all MongoDB Aggregation operations
     """
 
     subclasses = OrderedDict()
 
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.subclasses[cls.__name__] = cls
+
     def __init__(self, doc=None):
         if doc is None:
             self._doc = {}
         else:
             self._doc = doc
-
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        cls.subclasses[cls.__name__] = cls
-
-    @staticmethod
-    def ops():
-        return Agg_Operation.subclasses
 
     def set_op(self, doc):
         self._doc = doc
@@ -42,34 +54,48 @@ class Agg_Operation(object):
     def __call__(self):
         return { self.op_name() : self._doc }
 
-    def name(self):
-        return self.__class__.__name__
-
-    def op_name(self):
-        return "$" + self.name()
-
     def __repr__(self):
         return "{" + '\'${}\': {}'.format( self.name(), self._doc) + "}"
 
-class match(Agg_Operation):
 
-    @staticmethod
-    def date_range_query(date_field, start=None, end=None):
+class Value_Operation(Agg_Operation):
 
-        if start is not None and not isinstance(start, datetime.datetime):
-            raise ValueError( "{} is not and instance of datetime".format( start ))
-        if end is not None and not isinstance(end, datetime.datetime):
-            raise ValueError( "{} is not and instance of datetime".format( end ))
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.subclasses[cls.__name__] = cls
 
-        range_query = None
-        if start and end:
-            range_query = {date_field: {"$gte": start, "$lte": end}}
-        elif start:
-            range_query = {date_field: {"$gte": start}}
-        elif end:
-            range_query = {date_field: {"$lte": end}}
+    def __init__(self, value):
+        self._value = value
 
-        return range_query
+    def set_value(self, value):
+        self._value = value
+
+    def get_value(self):
+        return self._value
+
+    def __call__(self):
+        return { self.op_name() : self._value }
+
+class match(Doc_Operation):
+    pass
+
+    # @staticmethod
+    # def date_range_query(date_field, start=None, end=None):
+    #
+    #     if start is not None and not isinstance(start, datetime.datetime):
+    #         raise ValueError( "{} is not and instance of datetime".format( start ))
+    #     if end is not None and not isinstance(end, datetime.datetime):
+    #         raise ValueError( "{} is not and instance of datetime".format( end ))
+    #
+    #     range_query = None
+    #     if start and end:
+    #         range_query = {date_field: {"$gte": start, "$lte": end}}
+    #     elif start:
+    #         range_query = {date_field: {"$gte": start}}
+    #     elif end:
+    #         range_query = {date_field: {"$lte": end}}
+    #
+    #     return range_query
 
 class range_match(match):
     """
@@ -99,13 +125,13 @@ class range_match(match):
         """
         return "match"
 
-class project(Agg_Operation):
+class project(Doc_Operation):
     pass
 
-class group(Agg_Operation):
+class group(Doc_Operation):
     pass
 
-class count_x(Agg_Operation):
+class count_x(Doc_Operation):
     """
     Disambiguate from count function
     """
@@ -122,10 +148,10 @@ class count_x(Agg_Operation):
     def op_name(self):
         return "$count"
 
-class lookup(Agg_Operation):
+class lookup(Doc_Operation):
     pass
 
-class sort(Agg_Operation):
+class sort(Doc_Operation):
     '''
     Required for ordered sorting of fields as python dictionaries do not
     guarantee to maintain insertion order. Sorted fields are maintained
@@ -164,116 +190,116 @@ class sort(Agg_Operation):
         else:
             raise ValueError("Invalid sort order must be pymongo.ASCENDING or pymongo.DESCENDING")
 
-class sortByCount(Agg_Operation):
+class sortByCount(Doc_Operation):
     pass
 
-class unwind(Agg_Operation):
+class unwind(Doc_Operation):
     pass
 
-class redact(Agg_Operation):
+class redact(Doc_Operation):
     pass
 
-class count(Agg_Operation):
+class count(Value_Operation):
     pass
 
-class limit(Agg_Operation):
+class limit(Value_Operation):
     pass
 
-class skip(Agg_Operation):
+class skip(Value_Operation):
     pass
 
-class out(Agg_Operation):
+class out(Value_Operation):
     pass
 
-class addFields(Agg_Operation):
+class addFields(Doc_Operation):
     pass
 
-class bucket(Agg_Operation):
+class bucket(Doc_Operation):
     pass
 
-class bucketAuto(Agg_Operation):
+class bucketAuto(Doc_Operation):
     pass
 
-class collStats(Agg_Operation):
+class collStats(Doc_Operation):
     pass
 
-class currentOp(Agg_Operation):
+class currentOp(Doc_Operation):
     pass
 
-class facet(Agg_Operation):
+class facet(Doc_Operation):
     pass
 
-class geoNear(Agg_Operation):
+class geoNear(Doc_Operation):
     pass
 
-class graphLookup(Agg_Operation):
+class graphLookup(Doc_Operation):
     pass
 
-class indexStats(Agg_Operation):
+class indexStats(Doc_Operation):
     pass
 
-class listLocalSessions(Agg_Operation):
+class listLocalSessions(Doc_Operation):
     pass
 
-class listSessions(Agg_Operation):
+class listSessions(Doc_Operation):
     pass
 
-class replaceRoot(Agg_Operation):
+class replaceRoot(Doc_Operation):
     pass
 
-class sample(Agg_Operation):
+class sample(Doc_Operation):
     pass
 
-class Example_for_Sample_Op_with_name(Agg_Operation):
+class Example_for_Sample_Op_with_name(Doc_Operation):
 
     def name(self):
         return "sample"
 
-class Sorter(object):
-    '''
-    Required for ordered sorting of fields as python dictionaries do not
-    guarantee to maintain insertion order. Sorted fields are maintained
-    in an ``OrderedDict`` class that ensures order is maintained.
-    '''
-
-    def __init__(self, **kwargs):
-        '''
-        parameters are key="asending" or key="descending"
-        '''
-        self._sorted = {}
-        self._sorted["$sort"] = OrderedDict()
-
-        self.add(kwargs)
-
-    def add(self, sorts):
-        for k, v in sorts.items():
-            self.add_sort(k, v)
-
-    def sort_fields(self):
-        return self._sorted["$sort"].keys()
-
-    def sort_items(self):
-        return self._sorted["$sort"].items()
-
-    def sort_directions(self):
-        return self._sorted["$sort"].values()
-
-    def sorts(self):
-        return self._sorted
-
-    def add_sort(self, field, sortOrder=pymongo.ASCENDING):
-        if sortOrder in [pymongo.ASCENDING, pymongo.DESCENDING]:
-            self._sorted["$sort"][field] = sortOrder
-        else:
-            raise ValueError("Invalid sort order must be pymongo.ASCENDING or pymongo.DESCENDING")
-
-    def __call__(self):
-        return self._sorted
-
-    def __str__(self):
-        return str(self._sorted)
-
-    def __repr__(self):
-        return self.__str__()
+# class Sorter(object):
+#     '''
+#     Required for ordered sorting of fields as python dictionaries do not
+#     guarantee to maintain insertion order. Sorted fields are maintained
+#     in an ``OrderedDict`` class that ensures order is maintained.
+#     '''
+#
+#     def __init__(self, **kwargs):
+#         '''
+#         parameters are key="asending" or key="descending"
+#         '''
+#         self._sorted = {}
+#         self._sorted["$sort"] = OrderedDict()
+#
+#         self.add(kwargs)
+#
+#     def add(self, sorts):
+#         for k, v in sorts.items():
+#             self.add_sort(k, v)
+#
+#     def sort_fields(self):
+#         return self._sorted["$sort"].keys()
+#
+#     def sort_items(self):
+#         return self._sorted["$sort"].items()
+#
+#     def sort_directions(self):
+#         return self._sorted["$sort"].values()
+#
+#     def sorts(self):
+#         return self._sorted
+#
+#     def add_sort(self, field, sortOrder=pymongo.ASCENDING):
+#         if sortOrder in [pymongo.ASCENDING, pymongo.DESCENDING]:
+#             self._sorted["$sort"][field] = sortOrder
+#         else:
+#             raise ValueError("Invalid sort order must be pymongo.ASCENDING or pymongo.DESCENDING")
+#
+#     def __call__(self):
+#         return self._sorted
+#
+#     def __str__(self):
+#         return str(self._sorted)
+#
+#     def __repr__(self):
+#         return self.__str__()
 
 
