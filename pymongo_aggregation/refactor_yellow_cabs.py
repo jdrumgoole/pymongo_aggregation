@@ -23,9 +23,11 @@ if __name__ == "__main__":
                     "pickup_point" : { "type" : "Point",
                                        "coordinates": [ "$pickup_longitude", "$pickup_latitude"]
                                        },
+                    "dropoff_point": { "type": "Point",
+                                     "coordinates": ["$dropoff_longitude", "$dropoff_latitude"]
+                                    },
+
                     "RatecodeID": 1,
-                    "pickup_longitude" : 1,
-                    "pickup_latitude" : 1,
                     "store_and_fwd_flag": 1,
                     "dropoff_longitude": 1,
                     "dropoff_latitude": 1,
@@ -47,5 +49,5 @@ if __name__ == "__main__":
 
     pipeline = Pipeline( projector, new_collection )
 
-    print( "Processing")
+    print( "Processing", pipeline)
     pipeline.aggregate(collection)
