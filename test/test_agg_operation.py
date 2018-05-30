@@ -1,8 +1,8 @@
 """
 Basic unit tests for agg_operation
 """
-from pymongo_aggregation.agg_operation import Agg_Operation, \
-    match, Example_for_Sample_Op_with_name, lookup, count_x, sort
+from pymongo_aggregation.agg_operation import Doc_Operation, \
+    match, Example_for_Sample_Op_with_name, lookup, count, sort
 import unittest
 import datetime
 
@@ -10,8 +10,8 @@ class Test( unittest.TestCase):
 
     def test_agg_op(self):
 
-        op = Agg_Operation({"a":"b"})
-        self.assertEqual( op.name(), "Agg_Operation")
+        op = Doc_Operation({"a":"b"})
+        self.assertEqual( op.name(), "Doc_Operation")
         op = match( { "a" : "c"})
         self.assertEqual( op.name(), "match")
 
@@ -51,16 +51,16 @@ class Test( unittest.TestCase):
 
         self.assertEqual( op(), {'$match': {'created': {'$gte': now }}})
 
-    def test_count_x(self):
+    def test_count(self):
 
-        op=count_x("counter")
+        op=count("counter")
         #print(op)
-        self.assertRaises( ValueError, count_x, None)
+        self.assertRaises( ValueError, count, None)
 
     def test_sort(self):
 
         op = sort( name=1, date=-1 )
-        print(op)
+        #print(op)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

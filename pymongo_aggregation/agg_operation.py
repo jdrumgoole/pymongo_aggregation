@@ -131,7 +131,7 @@ class project(Doc_Operation):
 class group(Doc_Operation):
     pass
 
-class count_x(Doc_Operation):
+class count(Doc_Operation):
     """
     Disambiguate from count function
     """
@@ -145,8 +145,8 @@ class count_x(Doc_Operation):
         else:
             raise ValueError( "count_field must be a string (str type)")
 
-    def op_name(self):
-        return "$count"
+    # def op_name(self):
+    #     return "$count"
 
 class lookup(Doc_Operation):
     pass
@@ -158,9 +158,9 @@ class sort(Doc_Operation):
     in an ``OrderedDict`` class that ensures order is maintained.
     '''
 
-    def __init__(self, *args):
+    def __init__(self, **args):
         '''
-        parameters are key="asending" or key="descending"
+        parameters are key="ascending" or key="descending"
         Can use kwargs in the form field=pymongo.ASCENDING because field may
         be a dotted string e.g. "group.name".
         '''
@@ -199,8 +199,8 @@ class unwind(Doc_Operation):
 class redact(Doc_Operation):
     pass
 
-class count(Value_Operation):
-    pass
+# class count(Value_Operation):
+#     pass
 
 class limit(Value_Operation):
     pass

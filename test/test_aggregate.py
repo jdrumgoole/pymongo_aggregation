@@ -13,12 +13,12 @@ class Test(unittest.TestCase):
 
     def test_aggregate(self):
 
-        p = Pipeline( match(),count_x( "counter")).aggregate( self._col)
+        p = Pipeline(count_x( "counter")).aggregate( self._col)
 
         for i in p:
             self.assertEqual( i["counter"], 116)
 
-        p = Pipeline( match(),count_x="counter").aggregate( self._col)
+        p = Pipeline( match(),count_x("counter")).aggregate( self._col)
 
         for i in p:
             self.assertEqual( i["counter"], 116)
