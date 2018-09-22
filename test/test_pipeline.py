@@ -1,5 +1,5 @@
 
-from pymongo_aggregation.agg_operation import Agg_Operation, match, lookup, group, project, sort, range_match
+from pymongo_aggregation.aggoperation import AggOperation, match, lookup, group, project, sort, range_match
 from pymongo_aggregation.pipeline import Pipeline
 from dateutil import parser
 import pymongo

@@ -1,7 +1,7 @@
 """
 Basic unit tests for agg_operation
 """
-from pymongo_aggregation.agg_operation import Doc_Operation, \
+from pymongo_aggregation.aggoperation import DocOperation, \
     match, Example_for_Sample_Op_with_name, lookup, count, sort
 import unittest
 import datetime
@@ -10,8 +10,8 @@ class Test( unittest.TestCase):
 
     def test_agg_op(self):
 
-        op = Doc_Operation({"a":"b"})
-        self.assertEqual( op.name(), "Doc_Operation")
+        op = DocOperation({"a": "b"})
+        self.assertEqual( op.name(), "DocOperation")
         op = match( { "a" : "c"})
         self.assertEqual( op.name(), "match")
 
@@ -40,8 +40,8 @@ class Test( unittest.TestCase):
     def test_ops_list(self):
         self.assertTrue( "match" in Agg_Operation.ops())
         self.assertFalse( "foobar" in Agg_Operation.ops())
-        self.assertFalse( "Agg_Operation" in Agg_Operation.ops())
-        #print("agg ops", Agg_Operation.ops())
+        self.assertFalse( "AggOperation" in Agg_Operation.ops())
+        #print("agg ops", AggOperation.ops())
 
     def test_match(self):
         now = datetime.datetime.utcnow()

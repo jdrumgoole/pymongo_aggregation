@@ -10,9 +10,9 @@ import unittest
 from datetime import datetime
 # import pprint
 
-from pymongo_aggregation.agg_operation import match, project
+from pymongo_aggregation.aggoperation import match, project
 from pymongo_aggregation.pipeline import Pipeline
-from pymongo_aggregation.agg import CursorFormatter
+from pymongo_aggregation.aggobsolete import CursorFormatter
 import pymongo
 
 

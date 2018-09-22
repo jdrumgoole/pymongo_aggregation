@@ -1,9 +1,9 @@
 """
 
-Agg
+AggObsolete
 +++
 
-``Agg`` is a convenience class for constructing MongoDB Aggregation pipelines
+``AggObsolete`` is a convenience class for constructing MongoDB Aggregation pipelines
 
 @author: jdrumgoole
 
@@ -77,7 +77,7 @@ class CursorFormatter(object):
     Output a set of cursor elements by iterating over then. If the argument is an 
     agg object called aggegate on it first.
     
-    Take a mongodb Agg object and call aggregate on it.
+    Take a mongodb AggObsolete object and call aggregate on it.
     IF root is "-" send the output to stdout.
     
     If root is a file name output the content to that file.
@@ -254,7 +254,7 @@ class CursorFormatter(object):
 #         print( "Wrote %i records" % count )
 
 
-class Agg(object):
+class AggObsolete(object):
     '''
     A wrapper class for the MongoDB Aggregation framework (MongoDB 3.2)
     '''
@@ -284,22 +284,22 @@ class Agg(object):
 
     @staticmethod
     def __match(matcher):
-        Agg.__typeCheckDict(matcher)
+        AggObsolete.__typeCheckDict(matcher)
         return {"$match": matcher}
 
     @staticmethod
     def __project(projector):
-        Agg.__typeCheckDict(projector)
+        AggObsolete.__typeCheckDict(projector)
         return {"$project": projector}
 
     @staticmethod
     def __group(grouper):
-        Agg.__typeCheckDict(grouper)
+        AggObsolete.__typeCheckDict(grouper)
         return {"$group": grouper}
 
     @staticmethod
     def __unwind(unwinder):
-        # Agg.__typeCheckDict( unwinder )
+        # AggObsolete.__typeCheckDict( unwinder )
         return {"$unwind": unwinder}
 
     @staticmethod
@@ -327,35 +327,35 @@ class Agg(object):
             return self
 
         self.__hasDollarOutCheck("limit: %i" % size)
-        self._agg.append(Agg.__limit(size))
+        self._agg.append(AggObsolete.__limit(size))
 
         return self
 
     def addSample(self, size=100):
 
         self.__hasDollarOutCheck("sample: %i" % size)
-        self._agg.append(Agg.__sample(size))
+        self._agg.append(AggObsolete.__sample(size))
 
         return self
 
     def addMatch(self, matcher):
 
         self.__hasDollarOutCheck("match: %s" % matcher)
-        self._agg.append(Agg.__match(matcher))
+        self._agg.append(AggObsolete.__match(matcher))
 
         return self
 
     def addProject(self, projector):
 
         self.__hasDollarOutCheck("project: %s" % projector)
-        self._agg.append(Agg.__project(projector))
+        self._agg.append(AggObsolete.__project(projector))
 
         return self
 
     def addGroup(self, grouper):
 
         self.__hasDollarOutCheck("group: %s" % grouper)
-        self._agg.append(Agg.__group(grouper))
+        self._agg.append(AggObsolete.__group(grouper))
 
         return self
 
@@ -375,7 +375,7 @@ class Agg(object):
     def addUnwind(self, unwinder):
 
         self.__hasDollarOutCheck("$unwind: %s" % unwinder)
-        self._agg.append(Agg.__unwind(unwinder))
+        self._agg.append(AggObsolete.__unwind(unwinder))
 
         return self
 
@@ -387,7 +387,7 @@ class Agg(object):
         if self._hasDollarOut:
             raise ValueError("Aggregation already has $out defined: %s" % self._agg)
         else:
-            self._agg.append(Agg.__out(output))
+            self._agg.append(AggObsolete.__out(output))
             self._hasDollarOut = True
 
         return self
@@ -426,7 +426,7 @@ class Agg(object):
         agg = "db." + self._collection.name + ".aggregate([\n"
         for i in self._agg:
             #            agg = agg + pprint.pformat( i ) + ",\n" 
-            agg = agg + json.dumps(i, default=Agg.json_serial) + ",\n"
+            agg = agg + json.dumps(i, default=AggObsolete.json_serial) + ",\n"
 
         if agg.endswith(",\n"):
             agg = agg[:-2]

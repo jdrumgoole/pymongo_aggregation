@@ -4,8 +4,11 @@ Author: joe@joedrumgoole.com
 
 """
 import pymongo
+import pprint
 
-from pymongo_aggregation.agg_operation import project, out
+import argparse
+
+from pymongo_aggregation.aggoperation import project, limit, out
 from pymongo_aggregation.pipeline import Pipeline
 
 if __name__ == "__main__":
@@ -13,6 +16,23 @@ if __name__ == "__main__":
     #     type: "Point",lon lat
     #     coordinates: [-73.856077, 40.848447]
     # }
+
+
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--host", default="mongodb://localhost:27017" , help="MongoDB URI [default: %(default)s]")
+    parser.add_argument("--limit", type=int, help="Limit number of records processed")
+    parser.add_argument("--database", type=str, default="test", help="Database to use: [default: %(default)s]" )
+    parser.add_argument("--collection", type=str, default="test", help="Collection to use: [default: %(default)s]" )
+    parser.add_argument("--out", type=str, default="yellow_cabs", help="Default output collection [default: %(default)s]")
+
+    args = parser.parse_args()
+
+    client = pymongo.MongoClient( host=args.host)
+    database   = client[args.database]
+    collection = database[ args.collection]
+    print('Using input database    : {}'.format(args.database))
+    print('Using input collection  : {}'.format(args.collection))
+    print('Using output collection : {}'.format(args.out))
 
     point_mapper = {  "_id": 0,
                     "VendorID": 1,
@@ -29,8 +49,6 @@ if __name__ == "__main__":
 
                     "RatecodeID": 1,
                     "store_and_fwd_flag": 1,
-                    "dropoff_longitude": 1,
-                    "dropoff_latitude": 1,
                     "payment_type": 1,
                     "fare_amount": 1,
                     "extra": 1,
@@ -40,14 +58,15 @@ if __name__ == "__main__":
                     "improvement_surcharge": 1,
                     "total_amount": 1 }
 
+    projector = project(point_mapper)
+    new_collection = out(args.out)
 
-    client     = pymongo.MongoClient()
-    database   = client["NYC"]
-    collection = database[ "taxi"]
-    projector = project( point_mapper )
-    new_collection = out( "taxi_geo")
+    if args.limit and (args.limit > 0):
+        pipeline = Pipeline(projector, limit(args.limit), new_collection)
+    else:
+        pipeline = Pipeline(projector, new_collection)
 
-    pipeline = Pipeline( projector, new_collection )
+    print( "Processing")
+    pprint.pprint(pipeline)
 
-    print( "Processing", pipeline)
     pipeline.aggregate(collection)
