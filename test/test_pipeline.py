@@ -7,6 +7,7 @@ import unittest
 
 class Test( unittest.TestCase):
 
+
     def setUp(self):
         self._client = pymongo.MongoClient()
         self._database = self._client[ "TEST_AGG"]

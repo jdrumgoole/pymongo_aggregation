@@ -19,13 +19,23 @@ class AggOperation(object):
     """
     Super class for all Aggregation operations.
     Should not be instantiated directly. Use
+    DocOperation or ValueOperation
     """
 
-    subclasses = OrderedDict()
+    __subclasses = OrderedDict()
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.__subclasses[cls.__name__] = cls
 
     @staticmethod
     def ops():
-        return AggOperation.subclasses
+        """
+        Every Sub class of AggOperations will register with subclasses
+        then we can always determine the set of valid ops.
+        :return: dictionary of valid subclasses
+        """
+        return AggOperation.__subclasses
 
     def name(self):
         return self.__class__.__name__
@@ -39,36 +49,33 @@ class AggOperation(object):
 
 class DocOperation(AggOperation):
     """
-    Superclass for all MongoDB Aggregation operations that
-    take a doc as a target field.
+    A DocOperation is a MongoDB aggregation operator that
+    takes a doc as an argument.
 
-    e.g. { "$match" : { <match args }}
+    e.g. { "$match" : { <match args> }}
     """
-    _doc: dict
 
-    subclasses = OrderedDict()
-
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        cls.subclasses[cls.__name__] = cls
-
-    def __init__(self, doc=None):
-        if doc is None:
-            self._doc = {}
+    def __init__(self, doc_arg=None):
+        if doc_arg is None:
+            self._doc_arg = {}
+        elif isinstance(doc_arg, dict):
+            self._doc_arg = doc_arg
         else:
-            self._doc = doc
+            raise ValueError(f'{doc} is not a dict object')
 
-    def set_op(self, doc):
-        self._doc = doc
+    @property
+    def doc_arg(self):
+        return self._doc_arg
 
-    def get_op(self):
-        return self._doc
+    @doc_arg.setter
+    def doc_arg(self, doc_arg):
+        self._doc_arg = doc_arg
 
     def __call__(self):
-        return {self.op_name(): self._doc}
+        return {self.op_name(): self._doc_arg}
 
     def __repr__(self):
-        return pprint.pformat({self.op_name(): self._doc})
+        return pprint.pformat({self.op_name(): self._doc_arg})
 
 
 class ValueOperationError(ValueError):
@@ -82,10 +89,6 @@ class ValueOperation(AggOperation):
 
     e.g. { "$limit" : 30 } or { "$out" : "data_collection" }
     """
-
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        cls.subclasses[cls.__name__] = cls
 
     def __init__(self, value):
         self._value = value
@@ -103,46 +106,34 @@ class ValueOperation(AggOperation):
 
     def __repr__(self):
         if type( self._value ) == str:
-            v = "'{}'".format(self._value)
+            v = f"'{self._value}'"
         else:
-            v = "{}".format(self._value)
+            v = f"{self._value}"
 
-        return "{{'{}':{}}}".format(self.op_name(), v)
+        return f"{{'{self.op_name()}':{v}}}"
+
 
 class match(DocOperation):
-    pass
 
+    @staticmethod
+    def range_query(field, start=None, end=None):
 
-class range_match(match):
-    """
-    Create a match operator specifying that a field fall between two date
-    ranges *start* and *end*.
-    """
+        if start and end:
+            doc = {field: {"$gte": start, "$lte": end}}
+        elif start:
+            doc = {field: {"$gte": start}}
+        elif end:
+            doc = {field: {"$lte": end}}
 
-    def __init__(self, field, start=None, end=None):
+        return doc
+
+    @staticmethod
+    def time_range_query(date_field, start=None, end=None):
         if start is not None and not isinstance(start, datetime.datetime):
             raise ValueError("{} is not and instance of datetime".format( start))
         if end is not None and not isinstance(end, datetime.datetime):
             raise ValueError("{} is not and instance of datetime".format( end ))
-
-        self._doc = {field: {}}
-        if start and end:
-            self._doc = {field: {"$gte": start, "$lte": end}}
-        elif start:
-            self._doc = {field: {"$gte": start}}
-        elif end:
-            self._doc = {field: {"$lte": end}}
-
-    def name(self):
-        """
-        Override the use of the class name as the name of the class so we parse the right
-        operator
-
-        Range_Match is still a $match operator.
-        :return: "match"
-
-        """
-        return "match"
+        return match.range_query(date_field, start, end)
 
 class project(DocOperation):
     pass
@@ -150,10 +141,7 @@ class project(DocOperation):
 class group(DocOperation):
     pass
 
-class count(DocOperation):
-    """
-    Disambiguate from count function
-    """
+class count(ValueOperation):
 
     def __init__(self, count_field):
         if isinstance( count_field, str):
@@ -163,9 +151,6 @@ class count(DocOperation):
                 raise ValueError("count_field cannot be None")
         else:
             raise ValueError("count_field must be a string (str type)")
-
-    # def op_name(self):
-    #     return "$count"
 
 class lookup(DocOperation):
     pass
@@ -202,9 +187,9 @@ class sort(DocOperation):
         {'$sort': OrderedDict([('x', 1)])}
         >>> sort(("x", 1))
         {'$sort': OrderedDict([('x', 1)])}
-        >>> sort( x=pymongo.DESCENDING)
+        >>> sort(x=pymongo.DESCENDING)
         {'$sort': OrderedDict([('x', -1)])}
-        >>> sort( x=pymongo.ASCENDING)
+        >>> sort(x=pymongo.ASCENDING)
         {'$sort': OrderedDict([('x', 1)])}
 
         >>> sort( x=2)
@@ -256,10 +241,6 @@ class unwind(DocOperation):
 
 class redact(DocOperation):
     pass
-
-
-# class count(ValueOperation):
-#     pass
 
 
 class limit(ValueOperation):

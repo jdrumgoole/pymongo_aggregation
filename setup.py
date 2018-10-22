@@ -7,13 +7,13 @@ Created on 30 Sep 2016
 from setuptools import setup, find_packages
 import os
 from codecs import open
-VERSION="0.2a1"
+VERSION="0.3a1"
 
 def read(f):
     return open(f, 'r').read()
     
 setup(
-    name = "pymongo_aggregation",
+    name = "pymonager",
     version = VERSION,
     author = "Joe Drumgoole",
     author_email = "joe@joedrumgoole.com",
@@ -21,7 +21,7 @@ setup(
     long_description = read('README.md'),
     include_package_data=True,
     keywords = "MongoDB API Aggregation",
-    url = "https://github.com/jdrumgoole/pymongodb_aggregation",
+    url = "https://github.com/jdrumgoole/pymonager",
     
     classifiers=[
         # How mature is this project? Common values are
@@ -38,15 +38,15 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 3.6' ],
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7'],
    
-    install_requires = [ "pymongo", "nose" ],
-    tests_require = [ "dateutil"],
+    install_requires=["pymongo", "nose"],
+    tests_require = ["dateutils", "nose"],
     package_data={
         '': ['*.txt', '*.rst', '*.md'],
     },
 
     packages = find_packages(),
     test_suite='nose.collector',
-    tests_require=['nose'],
 )

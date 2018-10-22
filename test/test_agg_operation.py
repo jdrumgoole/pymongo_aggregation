@@ -1,14 +1,20 @@
 """
 Basic unit tests for agg_operation
 """
-from pymongo_aggregation.aggoperation import DocOperation, \
+from pymonager.agg import AggOperation, DocOperation, \
     match, Example_for_Sample_Op_with_name, lookup, count, sort
 import unittest
 import datetime
 
 class Test( unittest.TestCase):
 
+
     def test_agg_op(self):
+
+        op=AggOperation()
+        self.assertEqual(op.name(), AggOperation.__name__)
+
+    def test_doc_op(self):
 
         op = DocOperation({"a": "b"})
         self.assertEqual( op.name(), "DocOperation")
@@ -38,18 +44,17 @@ class Test( unittest.TestCase):
         self.assertEqual( str(op), '{\'$lookup\': {}}')
 
     def test_ops_list(self):
-        self.assertTrue( "match" in Agg_Operation.ops())
-        self.assertFalse( "foobar" in Agg_Operation.ops())
-        self.assertFalse( "AggOperation" in Agg_Operation.ops())
+        self.assertTrue( "match" in AggOperation.ops())
+        self.assertFalse( "foobar" in AggOperation.ops())
+        self.assertFalse( "AggOperation" in AggOperation.ops())
         #print("agg ops", AggOperation.ops())
 
-    def test_match(self):
+    def test_ranged_match(self):
         now = datetime.datetime.utcnow()
-        op=match()
-        op.set_op( match.date_range_query(date_field="created",
+        op = match(match.time_range_query(date_field="created",
                                           start=now))
 
-        self.assertEqual( op(), {'$match': {'created': {'$gte': now }}})
+        self.assertEqual(op(), {'$match': {'created': {'$gte': now}}})
 
     def test_count(self):
 

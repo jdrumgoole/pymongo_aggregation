@@ -1,6 +1,6 @@
 import unittest
-from pymongo_aggregation.pipeline import Pipeline
-from pymongo_aggregation.aggoperation import AggOperation, match, count_x
+from pymonager.pipeline import Pipeline
+from pymonager.agg import match, count_x
 import pymongo
 
 

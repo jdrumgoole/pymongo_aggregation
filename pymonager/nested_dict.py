@@ -1,17 +1,18 @@
-'''
+"""
 Created on 4 Apr 2017
 
 @author: jdrumgoole
-'''
-    
-class Nested_Dict( object ):
-    '''
+"""
+
+
+class Nested_Dict(object):
+    """
     Allow dotted access of nested dicts.
     so :
     a[ "x.y.z" ] = 1 is equivalent to a[ x[ y[ z ]]] = 1
     
     a = { x : { y : z }}}
-    '''
+    """
     
     def __init__(self, d=None):
         
