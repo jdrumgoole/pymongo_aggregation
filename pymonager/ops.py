@@ -15,36 +15,55 @@ import pprint
 import pymongo
 
 
-class AggOperation(object):
+class AggOperation(dict):
     """
     Super class for all Aggregation operations.
     Should not be instantiated directly. Use
     DocOperation or ValueOperation
     """
 
-    __subclasses = OrderedDict()
+    # __subclasses = OrderedDict()
+    #
+    # def __init_subclass__(cls, **kwargs):
+    #     super().__init_subclass__(**kwargs)
+    #     cls.__subclasses[cls.__name__] = cls
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        cls.__subclasses[cls.__name__] = cls
+    def __init__(self, arg=None):
+        if arg is None:
+            self[self.op_name] = {}
+        else:
+            self[self.op_name] = arg
 
-    @staticmethod
-    def ops():
-        """
-        Every Sub class of AggOperations will register with subclasses
-        then we can always determine the set of valid ops.
-        :return: dictionary of valid subclasses
-        """
-        return AggOperation.__subclasses
+    # @staticmethod
+    # def valid_op(op):
+    #     """
+    #     Every Sub class of AggOperations will register with subclasses
+    #     then we can always determine the set of valid ops.
+    #     :return: dictionary of valid subclasses
+    #     """
+    #     return op.name in AggOperation.__subclasses
 
+    @property
+    def arg(self):
+        return self[self.op_name]
+
+    @arg.setter
+    def arg(self, arg):
+        self[self.op_name] = arg
+
+    @property
     def name(self):
         return self.__class__.__name__
 
+    @property
     def op_name(self):
-        return "$" + self.name()
+        return f"${self.name}"
 
     def __repr__(self):
-        return "{}".format(self.op_name())
+        return f"{self.name}({self.arg!r})"
+
+    def __str__(self):
+        return f"{{'{self.op_name}': {self.arg}}}"
 
 
 class DocOperation(AggOperation):
@@ -55,28 +74,13 @@ class DocOperation(AggOperation):
     e.g. { "$match" : { <match args> }}
     """
 
-    def __init__(self, doc_arg=None):
-        if doc_arg is None:
-            self._doc_arg = {}
-        elif isinstance(doc_arg, dict):
-            self._doc_arg = doc_arg
+    def __init__(self, arg=None):
+        if arg is None:
+            self[self.op_name] = {}
+        elif isinstance(arg, dict):
+            self[self.op_name] = arg
         else:
-            raise ValueError(f'{doc} is not a dict object')
-
-    @property
-    def doc_arg(self):
-        return self._doc_arg
-
-    @doc_arg.setter
-    def doc_arg(self, doc_arg):
-        self._doc_arg = doc_arg
-
-    def __call__(self):
-        return {self.op_name(): self._doc_arg}
-
-    def __repr__(self):
-        return pprint.pformat({self.op_name(): self._doc_arg})
-
+            raise ValueError(f'{arg} is not a dict object')
 
 class ValueOperationError(ValueError):
     pass
@@ -90,27 +94,11 @@ class ValueOperation(AggOperation):
     e.g. { "$limit" : 30 } or { "$out" : "data_collection" }
     """
 
-    def __init__(self, value):
-        self._value = value
-
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        self._value = value
-
-    def __call__(self):
-        return {self.op_name(): self._value }
-
-    def __repr__(self):
-        if type( self._value ) == str:
-            v = f"'{self._value}'"
+    def __init__(self, arg):
+        if type(arg) in [ int, str, float, bool]:
+            self[self.op_name] = arg
         else:
-            v = f"{self._value}"
-
-        return f"{{'{self.op_name()}':{v}}}"
+            raise ValueError(f"parameter arg to {self.__name__} ('{arg}') must be a simple type")
 
 
 class match(DocOperation):
@@ -125,14 +113,14 @@ class match(DocOperation):
         elif end:
             doc = {field: {"$lte": end}}
 
-        return doc
+        return match(doc)
 
     @staticmethod
     def time_range_query(date_field, start=None, end=None):
         if start is not None and not isinstance(start, datetime.datetime):
-            raise ValueError("{} is not and instance of datetime".format( start))
+            raise ValueError(f"{start} is not and instance of datetime")
         if end is not None and not isinstance(end, datetime.datetime):
-            raise ValueError("{} is not and instance of datetime".format( end ))
+            raise ValueError(f"{end} is not and instance of datetime")
         return match.range_query(date_field, start, end)
 
 class project(DocOperation):
@@ -175,7 +163,8 @@ class sort(DocOperation):
         Can use kwargs in the form field=pymongo.ASCENDING because field may
         be a dotted string e.g. "group.name".
         """
-        self._doc = OrderedDict()
+
+        self[self.op_name] = OrderedDict()
 
         self.add(*args, **kwargs)
 
@@ -210,23 +199,23 @@ class sort(DocOperation):
                 raise ValueError(f"{i} is not a tuple or string")
 
         for k,v in kwargs.items():
-            if v in [ pymongo.ASCENDING, pymongo.DESCENDING]:
+            if v in [pymongo.ASCENDING, pymongo.DESCENDING]:
                 self.add_sort(k, v)
             else:
                 raise ValueError(f"{v} is not equal to pymongo.ASCENDING or pymongo.DESCENDING")
 
     def sort_fields(self):
-        return self._doc.keys()
+        return self[self.op_name].keys()
 
     def sort_items(self):
-        return self._doc.items()
+        return self[self.op_name].items()
 
     def sort_directions(self):
-        return self._doc.values()
+        return self[self.op_name].values()
 
     def add_sort(self, field, sort_order=pymongo.ASCENDING):
         if sort_order in [pymongo.ASCENDING, pymongo.DESCENDING]:
-            self._doc[field] = sort_order
+            self[self.op_name][field] = sort_order
         else:
             raise ValueError("Invalid sort order must be pymongo.ASCENDING or pymongo.DESCENDING")
 
@@ -245,13 +234,13 @@ class redact(DocOperation):
 
 class limit(ValueOperation):
 
-    def __init__(self, value):
-        if type(value) != int:
-            raise ValueError("{} requires a positive int argumemt (type of value is '{}".format(self.op_name(), type(value)))
-        if value < 1 :
-            raise ValueError("{} arguments must be 1 or more (value is: {})".format(self.op_name(), value))
+    def __init__(self, arg):
+        if type(arg) != int:
+            raise ValueError(f"{self.name} __init__requires an arg of type int (type of arg is '{type(arg)}')")
+        elif arg < 1:
+            raise ValueError(f"{self.name} __init__ parameters must be positive (arg={arg}")
         else:
-            super().__init__(value)
+            super().__init__(arg)
 
 
 class skip(ValueOperation):
@@ -259,7 +248,18 @@ class skip(ValueOperation):
 
 
 class out(ValueOperation):
-    pass
+
+    def __init__(self, arg):
+        if isinstance(arg, str):
+            if arg == "":
+                raise ValueError( "collection names cannot be ''")
+            if '$' in arg:
+                raise ValueError("collection names cannot contain '$'")
+            if arg.startswith("system."):
+                raise ValueError("collection names cannot begin with 'system.'")
+            self.arg = arg
+        else:
+            raise ValueError("parameter must be a string")
 
 
 class addFields(DocOperation):
@@ -316,6 +316,7 @@ class sample(DocOperation):
 
 class Example_for_Sample_Op_with_name(DocOperation):
 
+    @property
     def name(self):
         return "sample"
 

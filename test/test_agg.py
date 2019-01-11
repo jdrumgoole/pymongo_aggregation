@@ -10,8 +10,8 @@ import unittest
 from datetime import datetime
 # import pprint
 
-from pymonager.agg import match, project
-from pymonager.pipeline import Pipeline
+from pymonager.ops import match, project
+from pymonager.aggregation import Aggregation
 from pymonager.cursor import CursorFormatter
 import pymongo
 
@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
         self._col = self._mdb["test_groups"]
 
         self._formatter = None
-        self._agg = Pipeline()
+        self._agg = Aggregation()
 
     def tearDown(self):
         #self._client.drop_database("TEST_AGG")
@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
 
         filename = "JoeDrumgoole"
         ext = "json"
-        self._formatter = CursorFormatter(self._agg.aggregate( self._col), filename=filename, formatter=ext)
+        self._formatter = CursorFormatter(self._col.aggregate(self._agg), filename=filename, formatter=ext)
         self._formatter.output(fieldNames=["member.name", "member.id", "member.ts"], datemap=["member.ts"])
 
         self.assertTrue(os.path.isfile(filename))

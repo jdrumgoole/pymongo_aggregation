@@ -10,7 +10,7 @@ pip:clean test build
 test_build:
 	sh test-twine.sh
 
-testx:
+test_pkg:
 	python3 setup.py test
 
 build:

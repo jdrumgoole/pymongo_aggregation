@@ -1,40 +1,30 @@
 import pprint
 
-from .agg import DocOperation,ValueOperation
+from pymonager.ops import AggOperation
+from pymonager.typedlist import TypedList
 
 
-class Pipeline(list):
+class Aggregation(TypedList):
     """
     Execute a pymongo aggregation pipeline constructed from AggOperations
     """
 
-    def __init__(self, collection, *args):
-        super().__init__()
-        self._collection = collection
-        for i in args:
-            if isinstance(i, DocOperation) or isinstance(i, ValueOperation):
-                self.append(i)
-            else:
-                raise ValueError(f"{i} is not a class or sub class of DocOperation or ValueOperation")
+    def __init__(self, *args):
+        super().__init__(AggOperation, args)
 
-    def __repr__(self):
-        return "[" + ",\n ".join([repr(i) for i in self]) + "]"
-
-    def collection(self):
-        return self._collection
-
-    def aggregate(self):
-        return self._collection.aggregate([i() for i in self])
-
+    @property
+    def aggregation_string(self):
+        return "[" + ", ".join([str(x) for x in self]) + "]"
 
 def project_doc(doc, *args):
     if args:
         if args[0] in doc:
-            return project_doc( doc[args[0]], *args[1:] )
+            return project_doc(doc[args[0]], *args[1:])
         else:
             return doc
     else:
         return doc
+
 
 class CursorIterator(object):
 
@@ -42,7 +32,7 @@ class CursorIterator(object):
         self._cursor = cursor
         self._limit =1
 
-    def set_limit(self,limit):
+    def set_limit(self, limit):
         self._limit = limit
 
     def print(self, *args):
@@ -56,5 +46,4 @@ class CursorIterator(object):
                     pprint.pprint(project_doc(item, *args))
             except StopIteration:
                 pass
-
 

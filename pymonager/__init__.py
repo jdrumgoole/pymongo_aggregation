@@ -1,2 +1,2 @@
-from . import pipeline
-from .agg import DocOperation, ValueOperation, count
+from . import aggregation
+from .ops import DocOperation, ValueOperation, count

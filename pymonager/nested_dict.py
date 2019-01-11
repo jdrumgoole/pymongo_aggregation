@@ -5,7 +5,7 @@ Created on 4 Apr 2017
 """
 
 
-class Nested_Dict(object):
+class NestedDict(object):
     """
     Allow dotted access of nested dicts.
     so :
