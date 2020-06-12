@@ -1,2 +1,2 @@
 # pymag
-A set of convenience modules for using the [https://docs.mongodb.com/manual/aggregation/](MongoDB aggregation framework) with the python MongoDB Driver (pymongo)
+A set of convenience modules for using the [MongoDB aggregation framework](https://docs.mongodb.com/manual/aggregation/) with the python MongoDB Driver ([PyMongo](https://pymongo.readthedocs.io/en/stable/))
