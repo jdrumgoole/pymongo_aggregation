@@ -9,17 +9,27 @@ import datetime
 
 class Test( unittest.TestCase):
 
+    def test_name(self):
+        a = DocOperation({})
+        b = PositiveIntOperation(1)
+        c = StrOperation("hello")
+        d = match({})
+        self.assertEqual(a.class_name, "DocOperation")
+        self.assertEqual(b.class_name, "PositiveIntOperation")
+        self.assertEqual(c.class_name, "StrOperation")
+        self.assertEqual(d.class_name, "match")
+
     def test_agg_op(self):
 
         op=AggOperation()
-        self.assertEqual(op.name, AggOperation.__name__)
+        self.assertEqual(op.class_name, AggOperation.__name__)
 
     def test_doc_op(self):
 
         op = DocOperation({"a": "b"})
-        self.assertEqual( op.name, "DocOperation")
+        self.assertEqual(op.class_name, "DocOperation")
         op = match({"a": "c"})
-        self.assertEqual(op.name, "match")
+        self.assertEqual(op.class_name, "match")
         self.assertRaises(ValueError, match, 1) # not a dict
 
         op = match()

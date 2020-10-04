@@ -188,7 +188,7 @@ class AggObsolete(object):
         raise TypeError("Type not serializable")
 
     def json_format(self):
-        agg = "db." + self._collection.name + ".aggregate([\n"
+        agg = "db." + self._collection.class_name + ".aggregate([\n"
         for i in self._agg:
             #            agg = agg + pprint.pformat( i ) + ",\n" 
             agg = agg + json.dumps(i, default=AggObsolete.json_serial) + ",\n"
@@ -199,7 +199,7 @@ class AggObsolete(object):
         return agg + '])\n'
 
     def python_format(self):
-        agg = "db." + self._collection.name + ".aggregate( [\n"
+        agg = "db." + self._collection.class_name + ".aggregate( [\n"
         for i in self._agg:
             agg = agg + pprint.pformat(i) + ",\n"
 
@@ -265,11 +265,11 @@ class AggObsolete(object):
 
         if collation is None:
             return database.command({"view": view_name,
-                                     "viewOn": self._collection.name,
+                                     "viewOn": self._collection.class_name,
                                      "pipeline": self._agg})
         else:
             return database.command({"view": view_name,
-                                     "viewOn": self._collection.name,
+                                     "viewOn": self._collection.class_name,
                                      "pipeline": self._agg,
                                      "collation": collation})
 

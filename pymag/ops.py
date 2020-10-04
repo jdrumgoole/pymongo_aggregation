@@ -10,7 +10,6 @@ the correct name for the MongoDB Aggregation operation
 
 import datetime
 from collections import OrderedDict
-import pprint
 
 import pymongo
 
@@ -29,6 +28,7 @@ class AggOperation(dict):
     #     cls.__subclasses[cls.__name__] = cls
 
     def __init__(self, arg=None):
+        super().__init__()
         if arg is None:
             self[self.op_name] = {}
         else:
@@ -52,15 +52,15 @@ class AggOperation(dict):
         self[self.op_name] = arg
 
     @property
-    def name(self):
+    def class_name(self):
         return self.__class__.__name__
 
     @property
     def op_name(self):
-        return f"${self.name}"
+        return f"${self.class_name}"
 
     def __repr__(self):
-        return f"{self.name}({self.arg!r})"
+        return f"{self.class_name}({self.arg!r})"
 
     def __str__(self):
         return f"{{'{self.op_name}': {self.arg}}}"
@@ -270,9 +270,6 @@ class bucket(DocOperation):
     pass
 
 
-class bucketAuto(DocOperation):
-    pass
-
 
 class collStats(DocOperation):
     pass
@@ -317,7 +314,7 @@ class sample(DocOperation):
 class Example_for_Sample_Op_with_name(DocOperation):
 
     @property
-    def name(self):
+    def class_name(self):
         return "sample"
 
 
