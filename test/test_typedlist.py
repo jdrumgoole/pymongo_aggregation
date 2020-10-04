@@ -1,5 +1,5 @@
 import unittest
-from pymonager.typedlist import TypedList
+from pymag.typedlist import TypedList
 
 
 class TestTypedList(unittest.TestCase):
