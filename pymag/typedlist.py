@@ -14,6 +14,10 @@ class TypedList(list):
         else:
             return x
 
+    @property
+    def item_type(self):
+        return self._type
+
     def __add__(self, value):
         if self._validate(value):
             super().__add__(value)
@@ -33,7 +37,13 @@ class TypedList(list):
             super().append(value)
 
     def extend(self, l):
-        super().extend([self._validate(x) for x in l])
+        if type(l) == TypedList:
+            if self.item_type == l.item_type:
+                super().extend(l)
+            else:
+                raise ValueError(f"{l.item_type} does not match {self.item_type}")
+        else:
+            raise ValueError(f"{l} is not a TypedList")
 
     def insert(self, index, value):
         if self._validate(value):

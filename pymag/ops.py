@@ -82,38 +82,71 @@ class DocOperation(AggOperation):
         else:
             raise ValueError(f'{arg} is not a dict object')
 
-class ValueOperationError(ValueError):
-    pass
 
-
-class ValueOperation(AggOperation):
+class PositiveIntOperation(AggOperation):
     """
     A value operation is an aggregation operation in which the
-    argument is a bare value.
+    argument is positive int value.
+
+    e.g. { "$limit" : 30 }
+    """
+
+    def __init__(self, arg):
+        super().__init__(arg)
+        if type(arg) is int: # , str, float, bool]:
+            if arg >= 0:
+                self[self.op_name] = arg
+            else:
+                raise ValueError(f"arg {arg} to {self.class_name} must be non-negative")
+        else:
+            raise ValueError(f"arg {arg} to {self.class_name} must be an int")
+
+
+class StrOperation(AggOperation):
+    """
+    A value operation is an aggregation operation in which the
+    argument is a string value.
+
+    e.g. { "$out" : "data_collection" }
+    """
+
+    def __init__(self, arg):
+        if type(arg) is str:
+            self[self.op_name] = arg
+        else:
+            raise ValueError(f"parameter arg to {self.__name__} ('{arg}') must be a str")
+
+
+class FloatOperation(AggOperation):
+    """
+    A value operation is an aggregation operation in which the
+    argument is a float value.
 
     e.g. { "$limit" : 30 } or { "$out" : "data_collection" }
     """
 
     def __init__(self, arg):
-        if type(arg) in [ int, str, float, bool]:
+        if type(arg) is float:
             self[self.op_name] = arg
         else:
-            raise ValueError(f"parameter arg to {self.__name__} ('{arg}') must be a simple type")
+            raise ValueError(f"parameter arg to {self.__name__} ('{arg}') must be a float")
 
 
-class match(DocOperation):
+class BoolOperation(AggOperation):
+    """
+    A value operation is an aggregation operation in which the
+    argument is a bool value.
 
-    @staticmethod
-    def range_query(field, start=None, end=None):
+    """
 
-        if start and end:
-            doc = {field: {"$gte": start, "$lte": end}}
-        elif start:
-            doc = {field: {"$gte": start}}
-        elif end:
-            doc = {field: {"$lte": end}}
+    def __init__(self, arg):
+        if type(arg) is bool:
+            self[self.op_name] = arg
+        else:
+            raise ValueError(f"parameter arg to {self.__name__} ('{arg}') must be a bool")
 
-        return match(doc)
+
+
 
     @staticmethod
     def time_range_query(date_field, start=None, end=None):
@@ -123,25 +156,10 @@ class match(DocOperation):
             raise ValueError(f"{end} is not and instance of datetime")
         return match.range_query(date_field, start, end)
 
+
 class project(DocOperation):
     pass
 
-class group(DocOperation):
-    pass
-
-class count(ValueOperation):
-
-    def __init__(self, count_field):
-        if isinstance( count_field, str):
-            if count_field:
-                self._doc = count_field
-            else:
-                raise ValueError("count_field cannot be None")
-        else:
-            raise ValueError("count_field must be a string (str type)")
-
-class lookup(DocOperation):
-    pass
 
 class sort(DocOperation):
     """
@@ -150,11 +168,8 @@ class sort(DocOperation):
     in an ``OrderedDict`` class that ensures order is maintained.
 
     We can add sorts as named fields in the parameter lists or as tuples
-    for field names that cannot be described using Python identifers.
+    for field names that cannot be described using Python identifiers.
 
-    so
-
-    sort(
     """
 
     def __init__(self, *args, **kwargs):
@@ -198,7 +213,7 @@ class sort(DocOperation):
             else:
                 raise ValueError(f"{i} is not a tuple or string")
 
-        for k,v in kwargs.items():
+        for k, v in kwargs.items():
             if v in [pymongo.ASCENDING, pymongo.DESCENDING]:
                 self.add_sort(k, v)
             else:
@@ -220,48 +235,6 @@ class sort(DocOperation):
             raise ValueError("Invalid sort order must be pymongo.ASCENDING or pymongo.DESCENDING")
 
 
-class sortByCount(DocOperation):
-    pass
-
-
-class unwind(DocOperation):
-    pass
-
-
-class redact(DocOperation):
-    pass
-
-
-class limit(ValueOperation):
-
-    def __init__(self, arg):
-        if type(arg) != int:
-            raise ValueError(f"{self.name} __init__requires an arg of type int (type of arg is '{type(arg)}')")
-        elif arg < 1:
-            raise ValueError(f"{self.name} __init__ parameters must be positive (arg={arg}")
-        else:
-            super().__init__(arg)
-
-
-class skip(ValueOperation):
-    pass
-
-
-class out(ValueOperation):
-
-    def __init__(self, arg):
-        if isinstance(arg, str):
-            if arg == "":
-                raise ValueError( "collection names cannot be ''")
-            if '$' in arg:
-                raise ValueError("collection names cannot contain '$'")
-            if arg.startswith("system."):
-                raise ValueError("collection names cannot begin with 'system.'")
-            self.arg = arg
-        else:
-            raise ValueError("parameter must be a string")
-
-
 class addFields(DocOperation):
     pass
 
@@ -270,12 +243,15 @@ class bucket(DocOperation):
     pass
 
 
+class bucketAuto(DocOperation):
+    pass
+
 
 class collStats(DocOperation):
     pass
 
 
-class currentOp(DocOperation):
+class count(StrOperation):
     pass
 
 
@@ -291,8 +267,97 @@ class graphLookup(DocOperation):
     pass
 
 
+class group(DocOperation):
+    pass
+
+
 class indexStats(DocOperation):
     pass
+
+
+class limit(PositiveIntOperation):
+    pass
+
+
+class unwind(DocOperation):
+    pass
+
+
+class listSessions(DocOperation):
+    pass
+
+
+class lookup(DocOperation):
+    pass
+
+
+class match(DocOperation):
+
+    @staticmethod
+    def range_query(field, start=None, end=None):
+
+        if start and end:
+            doc = {field: {"$gte": start, "$lte": end}}
+        elif start:
+            doc = {field: {"$gte": start}}
+        elif end:
+            doc = {field: {"$lte": end}}
+
+        return match(doc)
+
+
+class merge(DocOperation):
+    pass
+
+
+class out(StrOperation):
+
+    def __init__(self, arg):
+        super.__init__(arg)
+        if arg == "":
+            raise ValueError("collection names cannot be any empty string")
+        if '$' in arg:
+            raise ValueError("collection names cannot contain '$'")
+        if arg.startswith("system."):
+            raise ValueError("collection names cannot begin with 'system.'")
+        self.arg = arg
+
+
+class redact(DocOperation):
+    pass
+
+
+class skip(PositiveIntOperation):
+    def __init__(self, arg):
+        if type(arg) != int:
+            raise ValueError(f"{self.name} __init__ requires an arg of type int (type of arg is '{type(arg)}')")
+        else:
+            super().__init__(arg)
+
+
+
+
+class addFields(DocOperation):
+    pass
+
+
+class bucket(DocOperation):
+    pass
+
+
+class count(StrOperation):
+    pass
+
+
+class currentOp(DocOperation):
+    pass
+
+
+
+
+
+
+
 
 
 class listLocalSessions(DocOperation):

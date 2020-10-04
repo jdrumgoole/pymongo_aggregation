@@ -10,9 +10,9 @@ import unittest
 from datetime import datetime
 # import pprint
 
-from pymonager.ops import match, project
-from pymonager.aggregation import Aggregation
-from pymonager.cursor import CursorFormatter
+from pymag.ops import match, project
+from pymag.aggregation import Aggregation
+from pymag.cursor import CursorFormatter
 import pymongo
 
 

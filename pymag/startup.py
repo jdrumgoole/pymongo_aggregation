@@ -1,6 +1,6 @@
 import pymongo
-from pymonager.pipeline import Pipeline, CursorIterator, project_doc
-from pymonager.agg import match, group, sort, out
+from pymag.pipeline import Pipeline, CursorIterator, project_doc
+from pymag.agg import match, group, sort, out
 from dateutil.parser import parse
 
 

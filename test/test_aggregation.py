@@ -1,6 +1,6 @@
 
-from pymonager.ops import match, lookup, group, project, sort
-from pymonager.aggregation import Aggregation
+from pymag.ops import match, lookup, group, project, sort
+from pymag.aggregation import Aggregation
 from dateutil import parser
 import pymongo
 import unittest

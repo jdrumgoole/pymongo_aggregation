@@ -1,7 +1,7 @@
 import pprint
 
-from pymonager.ops import AggOperation
-from pymonager.typedlist import TypedList
+from pymag.ops import AggOperation
+from pymag.typedlist import TypedList
 
 
 class Aggregation(TypedList):
@@ -32,6 +32,7 @@ class CursorIterator(object):
         self._cursor = cursor
         self._limit =1
 
+    @property.setter
     def set_limit(self, limit):
         self._limit = limit
 

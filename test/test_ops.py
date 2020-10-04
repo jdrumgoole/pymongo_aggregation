@@ -1,13 +1,12 @@
 """
 Basic unit tests for agg_operation
 """
-from pymonager.ops import AggOperation, DocOperation, \
-    match, Example_for_Sample_Op_with_name, lookup, count, sort, limit, out
+from pymag.ops import *
 import unittest
 import datetime
 
 
-class Test( unittest.TestCase):
+class Test(unittest.TestCase):
 
     def test_name(self):
         a = DocOperation({})
