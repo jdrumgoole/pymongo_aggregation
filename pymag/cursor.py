@@ -3,6 +3,8 @@ import csv
 import pprint
 import sys
 from datetime import datetime
+from nesteddict import NestedDict
+
 
 import pymongo
 
@@ -57,46 +59,45 @@ class CursorFormatter(object):
 
         if time_format is None:
             time_format = "%d-%b-%Y %H:%M"
-        d = Nested_Dict(doc)
-        if d.has_key(field):
-            value = d.get_value(field)
+        d = NestedDict(doc)
+        if field in d:
+            value = d[field]
             if isinstance(value, datetime):
-                d.set_value(field, value.strftime(time_format))
+                d[field] = value.strftime(time_format)
             else:
-                d.set_value(field, datetime.fromtimestamp(value / 1000))
+                d[field] = datetime.fromtimestamp(value/1000)
 
-        return d.dict_value()
+        return dict(d)
 
     @staticmethod
     def fieldMapper(doc, fields):
-        '''
+        """
         Take 'doc' and create a new doc using only keys from the 'fields' list.
         Supports referencing fields using dotted notation "a.b.c" so we can parse
-        nested fields the way MongoDB does. The nested field class is a hack. It should
-        be a sub-class of dict.
-        '''
+        nested fields the way MongoDB does.
+        """
 
         if fields is None or len(fields) == 0:
             return doc
 
-        newDoc = Nested_Dict({})
-        oldDoc = Nested_Dict(doc)
+        new_doc = NestedDict()
+        old_doc = NestedDict(doc)
 
         for i in fields:
-            if oldDoc.has_key(i):
+            if i in old_doc:
                 # print( "doc: %s" % doc )
                 # print( "i: %s" %i )
-                newDoc.set_value(i, oldDoc.get_value(i))
-        return newDoc.dict_value()
+                new_doc[i] = old_doc[i]
+        return dict(new_doc)
 
     @staticmethod
-    def dateMapper(doc, datemap, time_format=None):
+    def dateMapper(doc, date_map, time_format=None):
         '''
         For all the fields in "datemap" find that key in doc and map the datetime object to
         a strftime string. This pprint and others will print out readable datetimes.
         '''
-        if datemap:
-            for i in datemap:
+        if date_map:
+            for i in date_map:
                 if isinstance(i, datetime):
                     CursorFormatter.dateMapField(doc, i, time_format=time_format)
         return doc

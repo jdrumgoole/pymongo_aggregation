@@ -1,7 +1,7 @@
 """
 Basic unit tests for agg_operation
 """
-from pymag.ops import *
+from pymag import *
 import unittest
 import datetime
 
@@ -9,32 +9,48 @@ import datetime
 class Test(unittest.TestCase):
 
     def test_name(self):
-        a = DocOperation({})
-        b = PositiveIntOperation(1)
-        c = StrOperation("hello")
+        a = DocStage({})
+        b = PositiveIntStage(1)
+        c = StrStage("hello")
         d = match({})
-        self.assertEqual(a.class_name, "DocOperation")
-        self.assertEqual(b.class_name, "PositiveIntOperation")
-        self.assertEqual(c.class_name, "StrOperation")
-        self.assertEqual(d.class_name, "match")
+        self.assertEqual(a.name, "DocStage")
+        self.assertEqual(b.name, "PositiveIntStage")
+        self.assertEqual(c.name, "StrStage")
+        self.assertEqual(d.name, "match")
 
     def test_agg_op(self):
 
-        op=AggOperation()
-        self.assertEqual(op.class_name, AggOperation.__name__)
+        op = AggStage()
+        self.assertEqual(op.name, AggStage.__name__)
 
     def test_doc_op(self):
 
-        op = DocOperation({"a": "b"})
-        self.assertEqual(op.class_name, "DocOperation")
+        op = DocStage()
+        self.asserTrue(isinstance(op, DocStage))
+        op = DocStage({"a": "b"})
+        self.assertEqual(op.name, "DocStage")
         op = match({"a": "c"})
-        self.assertEqual(op.class_name, "match")
+        self.assertEqual(op.name, "match")
         self.assertRaises(ValueError, match, 1) # not a dict
 
         op = match()
         self.assertEqual(op.op_name, "$match")
         self.assertEqual(str(op), "{'$match': {}}")
         self.assertEqual(repr(op), "match({})")
+
+    def test_str_op(self):
+
+        op = StrStage()
+        self.assertTrue(isinstance(op, StrStage))
+        op = StrStage("hello")
+        self.assertEqual(op.arg, "hello")
+
+    def test_positive_int_op(self):
+        op = PositiveIntStage(123)
+        self.assertEqual(op.arg, 123)
+
+        self.assertRaises(ValueError, PositiveIntStage, "hello")
+        self.assertRaises(ValueError, PositiveIntStage, -1)
 
     def test_limit_op(self):
         self.assertRaises(ValueError, limit, -1)
@@ -58,13 +74,15 @@ class Test(unittest.TestCase):
 
     def test_op(self):
         op = match()
-
-        self.assertEqual(op, {"$match": {}})
+        self.assertTrue(isinstance(op, match))
+        self.assertEqual(op(), "{'$match': {}}")
+        self.assertEqual(str(op), "{'$match': {}}")
+        self.assertEqual(str(op), op())
 
     def test_name_override(self):
 
         op = Example_for_Sample_Op_with_name()
-        self.assertEqual({"$sample": {}}, op)
+        self.assertEqual("{'$sample': {}}", op())
 
     def test_repr(self):
         op = lookup()
@@ -72,10 +90,11 @@ class Test(unittest.TestCase):
 
     def test_ranged_match(self):
         now = datetime.datetime.utcnow()
-        op = match.time_range_query(date_field="created",
-                                    start=now)
-
-        self.assertEqual(op, {'$match': {'created': {'$gte': now}}})
+        op = match.range_query(field="created",
+                               start=datetime.datetime(2020, 10, 9, 16, 6, 55, 1))
+        #print(op)
+        result = "{'$match': {'created': {'$gte': datetime.datetime(2020, 10, 9, 16, 6, 55, 1)}}}"
+        self.assertEqual(op(), result)
 
     def test_count(self):
 

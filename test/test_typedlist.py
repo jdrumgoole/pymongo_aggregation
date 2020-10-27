@@ -14,7 +14,7 @@ class TestTypedList(unittest.TestCase):
     def test_overrides(self):
 
         t = TypedList(tuple)
-        t = t + [(1,2)]
+        t = t + TypedList((1, 2))
         self.assertEqual(t[0], (1, 2))
 
 

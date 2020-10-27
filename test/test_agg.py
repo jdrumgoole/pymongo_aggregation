@@ -10,7 +10,7 @@ import unittest
 from datetime import datetime
 # import pprint
 
-from pymag.ops import match, project
+from pymag.stages import match, project
 from pymag.aggregation import Aggregation
 from pymag.cursor import CursorFormatter
 import pymongo

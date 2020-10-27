@@ -8,6 +8,10 @@ dateutils = "*"
 pymongo = "*"
 nose = "*"
 ipython = "*"
+nesteddict = "*"
+sphinx = "*"
+transcrypt = "*"
+dnspython = "*"
 
 [dev-packages]
 

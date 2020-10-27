@@ -1,7 +1,9 @@
 
-class TypedList(list):
+from collections import UserList
 
-    def __init__(self, type_constraint=None, seq=()):
+class TypedList(UserList):
+
+    def __init__(self, *args, **kwargs):
         self._type = type_constraint
         super().__init__([self._validate(x) for x in seq])
 
@@ -18,15 +20,17 @@ class TypedList(list):
     def item_type(self):
         return self._type
 
-    def __add__(self, value):
-        if self._validate(value):
-            super().__add__(value)
-
-    def __iadd__(self, value):
-        if isinstance(value, TypedList):
-            super().__iadd__(value)
+    def __add__(self, rhs):
+        if isinstance(rhs, TypedList):
+            return TypedList(list.__add__(self, rhs))
         else:
-            raise ValueError(f"{value} is not an instance of {self.__name__}")
+            raise ValueError(f"{rhs} is not an instance of {self.__class__.__name__}")
+
+    def __iadd__(self, rhs):
+        if isinstance(rhs, TypedList):
+            return TypedList(list.__iadd__(self, rhs))
+        else:
+            raise ValueError(f"{rhs} is not an instance of {self.__class__.__name__}")
 
     def __setitem__(self, key, value):
         if self._validate(value):

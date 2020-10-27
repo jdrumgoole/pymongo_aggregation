@@ -1,5 +1,5 @@
 
-from pymag.ops import match, lookup, group, project, sort
+from pymag.stages import match, lookup, group, project, sort
 from pymag.aggregation import Aggregation
 from dateutil import parser
 import pymongo

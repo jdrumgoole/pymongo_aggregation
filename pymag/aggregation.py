@@ -1,6 +1,6 @@
 import pprint
 
-from pymag.ops import AggOperation
+from pymag.stages import AggStage
 from pymag.typedlist import TypedList
 
 
@@ -10,7 +10,7 @@ class Aggregation(TypedList):
     """
 
     def __init__(self, *args):
-        super().__init__(AggOperation, args)
+        super().__init__(AggStage, args)
 
     @property
     def aggregation_string(self):
@@ -32,8 +32,12 @@ class CursorIterator(object):
         self._cursor = cursor
         self._limit =1
 
-    @property.setter
-    def set_limit(self, limit):
+    @property
+    def limit(self):
+        return self._limit
+
+    @limit.setter
+    def limit(self, limit):
         self._limit = limit
 
     def print(self, *args):
